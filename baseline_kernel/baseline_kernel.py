@@ -1,3 +1,9 @@
+'''
+"NB-SVM strong linear baseline"
+Original Author: Jeremy Howard
+notebook url: https://www.kaggle.com/jhoward/nb-svm-strong-linear-baseline/notebook
+'''
+
 import pandas as pd, numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
