@@ -20,19 +20,17 @@ def analyze_text(df_column):
 
     response = requests.post(language_api_url, headers=headers, json=documents)
     languages = response.json()
-    print(type(languages))
 
     response = requests.post(sentiment_api_url, headers=headers, json=documents)
     sentiments = response.json()
 
     response = requests.post(key_phrase_api_url, headers=headers, json=documents)
     key_phrases = response.json()
-    print(languages)
-    print(sentiments)
-    print(key_phrases)
+    # print(languages)
+    # print(sentiments)
+    # print(key_phrases)
 
     df = get_dataframe(languages, sentiments, key_phrases)
-    print(df)
     return df
 
 def convert_to_documents(comments):
@@ -73,7 +71,6 @@ def get_dataframe(languages, sentiments, key_phrases):
     data = {
         "azure_sentiments": extract_sentiments(sentiments)
     }
-    print(data)
     return pd.DataFrame(data)
 
 # data = {
