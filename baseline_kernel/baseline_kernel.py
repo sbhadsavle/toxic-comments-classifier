@@ -48,8 +48,8 @@ vec = TfidfVectorizer(ngram_range=(1,2), tokenizer=tokenize,
 trn_term_doc = vec.fit_transform(train[COMMENT])
 test_term_doc = vec.transform(test[COMMENT])
 
-# print(trn_term_doc)
-# print(test_term_doc)
+print(trn_term_doc)
+print(test_term_doc)
 
 x = trn_term_doc
 test_x = test_term_doc
