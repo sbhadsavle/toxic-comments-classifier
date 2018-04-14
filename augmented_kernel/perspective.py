@@ -10,14 +10,14 @@ def get_perspective_toxicity(comment):
 
 	analyze_request = {
 	  'comment': { 'text': comment },
-	  'requestedAttributes': {'TOXICITY': {}}
+	  'requestedAttributes': {'TOXICITY': {}},
+	  'languages': ["en"]
 	}
 
 	response = service.comments().analyze(body=analyze_request).execute()
 
 	# print(json.dumps(response, indent=2))
 	return response["attributeScores"]["TOXICITY"]["summaryScore"]["value"]
-
 
 
 # print(get_perspective_toxicity("You are a terrible, awful guy!"))
