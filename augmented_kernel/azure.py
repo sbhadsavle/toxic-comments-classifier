@@ -2,7 +2,9 @@
 import requests
 import pandas as pd
 
-subscription_key = "6849d779257149c7acbfe524328670fd"
+import api_keys
+
+subscription_key = api_keys.azure_text_api_key
 text_analytics_base_url = "https://southcentralus.api.cognitive.microsoft.com/text/analytics/v2.0/"
 
 language_api_url = text_analytics_base_url + "languages"
