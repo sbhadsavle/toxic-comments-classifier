@@ -13,14 +13,20 @@ def azure_text_analysis(train_df):
 
 def do_get_toxicity(comment):
 	toxicity = None
+	num_tries = 0
 	while True:
 		try:
+			num_tries += 1
 			toxicity = perspective.get_perspective_toxicity(comment)
 		except Exception as e:
-			print("Perspective API call failed, waiting 100s...")
-			time.sleep(100)
-			print("...trying again")
-			continue
+			if (num_tries < 5):
+				print("Perspective API call failed, waiting 100s...")
+				time.sleep(100)
+				print("...trying again")
+				continue
+			else:
+				# Just go ahead and default comment to 0.5 and move on
+				toxicity = 0.5
 		break
 	return toxicity
 
@@ -29,7 +35,7 @@ def perspective_text_analysis(train_df):
 	perspective_vals = []
 	for i,comment in enumerate(train_df["comment_text"]):
 		print("[Perspective API] Analyzing comment ", i)
-		if (len(comment) < 3000):
+		if (len(comment.encode('utf8')) < 3000):
 			toxicity = do_get_toxicity(comment)
 			perspective_vals.append(toxicity)
 		else:
@@ -40,7 +46,7 @@ def perspective_text_analysis(train_df):
 
 def main():
 	print("Reading input csv...")
-	train = pd.read_csv('../../input/train500.csv')
+	train = pd.read_csv('../../input/train.csv')
 
 	print("Azure text analysis...")
 	azure_df = azure_text_analysis(train)
