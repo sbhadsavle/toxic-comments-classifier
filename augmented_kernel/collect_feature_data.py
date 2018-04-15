@@ -1,5 +1,6 @@
 import pandas as pd, numpy as np
 import re, string
+import time
 
 import perspective
 import azure
@@ -10,12 +11,27 @@ def azure_text_analysis(train_df):
 	# print(result_df)
 	return result_df
 
+def do_get_toxicity(comment):
+	toxicity = None
+	while True:
+		try:
+			toxicity = perspective.get_perspective_toxicity(comment)
+		except Exception as e:
+			print("Perspective API call failed, waiting 100s...")
+			time.sleep(100)
+			print("...trying again")
+			continue
+		break
+	return toxicity
+
+
 def perspective_text_analysis(train_df):
 	perspective_vals = []
 	for i,comment in enumerate(train_df["comment_text"]):
 		print("[Perspective API] Analyzing comment ", i)
 		if (len(comment) < 3000):
-			perspective_vals.append(perspective.get_perspective_toxicity(comment))
+			toxicity = do_get_toxicity(comment)
+			perspective_vals.append(toxicity)
 		else:
 			perspective_vals.append(0.5) # default to "unknown" toxicity if length is too long
 
