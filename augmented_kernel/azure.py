@@ -1,6 +1,7 @@
 
 import requests
 import pandas as pd
+import numpy as np
 
 import api_keys
 
@@ -12,28 +13,37 @@ sentiment_api_url = text_analytics_base_url + "sentiment"
 key_phrase_api_url = text_analytics_base_url + "keyPhrases"
 
 def analyze_text(df_column):
-    # Convert comments to documents
-    documents = convert_to_documents(df_column)
-    headers = {
-        "Ocp-Apim-Subscription-Key": subscription_key
-    }
+    # Split df into chunks of less than 1000 comments each for API 
+    chunks = np.array_split(df_column, 160)
 
-    response = requests.post(language_api_url, headers=headers, json=documents)
-    languages = response.json()
-    # print(type(languages))
+    frames = []
+    for i,df_chunk in enumerate(chunks):
+        print("[Azure API] Analyzing chunk ", i)
+        # Convert comments to documents
+        documents = convert_to_documents(df_chunk)
+        headers = {
+            "Ocp-Apim-Subscription-Key": subscription_key
+        }
 
-    response = requests.post(sentiment_api_url, headers=headers, json=documents)
-    sentiments = response.json()
+        response = requests.post(language_api_url, headers=headers, json=documents)
+        languages = response.json()
+        # print(type(languages))
 
-    response = requests.post(key_phrase_api_url, headers=headers, json=documents)
-    key_phrases = response.json()
-    # print(languages)
-    # print(sentiments)
-    # print(key_phrases)
+        response = requests.post(sentiment_api_url, headers=headers, json=documents)
+        sentiments = response.json()
 
-    df = get_dataframe(languages, sentiments, key_phrases)
-    # print(df)
-    return df
+        response = requests.post(key_phrase_api_url, headers=headers, json=documents)
+        key_phrases = response.json()
+        # print(languages)
+        # print(sentiments)
+        # print(key_phrases)
+
+        df = get_dataframe(languages, sentiments, key_phrases)
+        frames.append(df)
+        # print(df)
+
+    result = pd.concat(frames, ignore_index=True)
+    return result
 
 def convert_to_documents(comments):
     """
