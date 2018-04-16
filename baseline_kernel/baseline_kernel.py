@@ -12,8 +12,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import re, string
 
-train = pd.read_csv('../../input/train.csv').sample(1000)
-test = pd.read_csv('../../input/test.csv').sample(1000)
+train = pd.read_csv('../../input/train.csv') #.sample(1000)
+test = pd.read_csv('../../input/test.csv') #.sample(1000)
 subm = pd.read_csv('../../input/sample_submission.csv')
 
 train, val = train_test_split(train, test_size=0.2, random_state=42)

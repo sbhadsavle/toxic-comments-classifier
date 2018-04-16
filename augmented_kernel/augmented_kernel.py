@@ -4,14 +4,15 @@ Authors: Sarang Bhadsavle and Ben Fu
 
 import pandas as pd, numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import train_test_split
 import re, string
 
-train = pd.read_csv('../../input/train.csv').sample(1000)
-test = pd.read_csv('../../input/test.csv').sample(1000)
+train = pd.read_csv('../../input/train_augmented.csv') #.sample(1000)
+test = pd.read_csv('../../input/test.csv') #.sample(1000)
 subm = pd.read_csv('../../input/sample_submission.csv')
 
 train, val = train_test_split(train, test_size=0.2, random_state=42)
@@ -39,7 +40,8 @@ def pr(y_i, y):
 def get_mdl(y):
     y = y.values
     r = np.log(pr(1,y) / pr(0,y))
-    m = LogisticRegression(C=4, dual=True)
+    # m = LogisticRegression(C=4, dual=True)
+    m = RandomForestClassifier()
     x_nb = x.multiply(r)
     print("    fitting...")
     return m.fit(x_nb, y), r
