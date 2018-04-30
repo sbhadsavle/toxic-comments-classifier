@@ -2,8 +2,12 @@ import pandas as pd, numpy as np
 import re, string
 import time
 
+import sys
+
 import perspective
 import azure
+
+import argparse
 
 def azure_text_analysis(train_df):
 	# print(train_df["comment_text"])
@@ -44,10 +48,7 @@ def perspective_text_analysis(train_df):
 	result_df = pd.DataFrame({'perspective_toxicities': perspective_vals})
 	return result_df
 
-def main():
-	print("Reading input csv...")
-	train = pd.read_csv('../../input/train.csv')
-
+def collect_features(train):
 	print("Azure text analysis...")
 	azure_df = azure_text_analysis(train)
 	train = train.join(azure_df)
@@ -57,8 +58,25 @@ def main():
 	persp_df = perspective_text_analysis(train)
 	train = train.join(persp_df)
 
+	return train
+
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-f", "--file", nargs=1, default=["../../input/train.csv"])
+	parser.add_argument("-o", "--output-file", nargs=1, default=["./train_augmented.csv"])
+
+	args = parser.parse_args()
+	input_fname = args.file[0]
+	output_fname = args.output_file[0]
+	print(input_fname)
+
+	print("Reading input csv...")
+	train = pd.read_csv(input_fname)
+
+	df = collect_features(train)
+
 	print("Writing csv...")
-	train.to_csv('train_augmented.csv', index=False)
+	df.to_csv(output_fname, index=False)
 	print("Done.")
 
 if __name__ == '__main__':

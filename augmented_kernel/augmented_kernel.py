@@ -11,9 +11,17 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import re, string
 
-train = pd.read_csv('../../input/train_augmented.csv') #.sample(1000)
-test = pd.read_csv('../../input/test.csv') #.sample(1000)
+from collect_feature_data import collect_features
+
+# persistence
+from sklearn.externals import joblib
+
+train = pd.read_csv('../../input/train.csv').sample(1000)
+test = pd.read_csv('../../input/test.csv').sample(1000)
 subm = pd.read_csv('../../input/sample_submission.csv')
+
+train = collect_features(train)
+test = collect_features(test)
 
 train, val = train_test_split(train, test_size=0.2, random_state=42)
 print(train.shape)
@@ -57,10 +65,12 @@ test_term_doc = vec.transform(test[COMMENT])
 
 # print(trn_term_doc)
 # print(test_term_doc)
+# Save vectorizer
+joblib.dump(vec, "vectorizer.pkl")
 
-x = trn_term_doc
-x_val = val_term_doc
-test_x = test_term_doc
+x = train[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(trn_term_doc.toArray()))
+x_val = train[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(val_term_doc.toArray()))
+test_x = test[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(test_term_doc.toArray()))
 
 print("val: " + str(x_val.shape[0]) + ", " + str(len(val)))
 print(x.shape)
@@ -74,6 +84,9 @@ for i, j in enumerate(label_cols):
     m,r = get_mdl(train[j])
     preds[:,i] = m.predict_proba(test_x.multiply(r))[:,1]
     print("Accuracy for " + j + ": " + str(accuracy_score(val[j], m.predict(x_val))))
+
+    print("Persistent model to disk:", j)
+    joblib.dump(m, j + ".pkl")
 
 print("Writing csv...")
 submid = pd.DataFrame({'id': subm["id"]})

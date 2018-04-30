@@ -3,6 +3,8 @@ import requests
 import pandas as pd
 import numpy as np
 
+import math
+
 import api_keys
 
 subscription_key = api_keys.azure_text_api_key
@@ -13,11 +15,18 @@ sentiment_api_url = text_analytics_base_url + "sentiment"
 key_phrase_api_url = text_analytics_base_url + "keyPhrases"
 
 def analyze_text(df_column):
-    # Split df into chunks of less than 1000 comments each for API 
-    chunks = np.array_split(df_column, 160)
+    # Split df into chunks of less than 1000 comments each for API
+    chunk_size = 1000
+    num_chunks = len(df_column) / chunk_size
+    if num_chunks < 1:
+        num_chunks = 1
+    else:
+        num_chunks = math.ceil(num_chunks)
+    print("num_chunks:", num_chunks)
+    chunks = np.array_split(df_column, num_chunks)
 
     frames = []
-    for i,df_chunk in enumerate(chunks):
+    for i, df_chunk in enumerate(chunks):
         print("[Azure API] Analyzing chunk ", i)
         # Convert comments to documents
         documents = convert_to_documents(df_chunk)
