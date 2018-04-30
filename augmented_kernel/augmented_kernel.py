@@ -16,12 +16,12 @@ from collect_feature_data import collect_features
 # persistence
 from sklearn.externals import joblib
 
-train = pd.read_csv('../../input/train.csv').sample(1000)
-test = pd.read_csv('../../input/test.csv').sample(1000)
+train = pd.read_csv('../../input/train_augmented.csv')# .sample(10)
+test = pd.read_csv("web_output.csv")
 subm = pd.read_csv('../../input/sample_submission.csv')
 
-train = collect_features(train)
-test = collect_features(test)
+# train = collect_features(train)
+# test = collect_features(test)
 
 train, val = train_test_split(train, test_size=0.2, random_state=42)
 print(train.shape)
@@ -41,18 +41,18 @@ re_tok = re.compile('([' + string.punctuation + '“”¨«»®´·º½¾¿¡§�
 def tokenize(s): 
     return re_tok.sub(r' \1 ', s).split()
 
-def pr(y_i, y):
+def pr(x, y_i, y):
     p = x[y==y_i].sum(0)
     return (p+1) / ((y==y_i).sum()+1)
 
-def get_mdl(y):
+def get_mdl(x, y):
     y = y.values
-    r = np.log(pr(1,y) / pr(0,y))
+    r = np.log(pr(x, 1,y) / pr(x, 0,y))
     # m = LogisticRegression(C=4, dual=True)
     m = RandomForestClassifier()
-    x_nb = x.multiply(r)
+    # x_nb = x.multiply(r)
     print("    fitting...")
-    return m.fit(x_nb, y), r
+    return m.fit(x, y), r
 
 print("Computing sparse matrix...")
 n = train.shape[0]
@@ -66,27 +66,38 @@ test_term_doc = vec.transform(test[COMMENT])
 # print(trn_term_doc)
 # print(test_term_doc)
 # Save vectorizer
-joblib.dump(vec, "vectorizer.pkl")
+with open("vectorizer.pkl", "wb") as f:
+    joblib.dump(vec, f)
 
-x = train[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(trn_term_doc.toArray()))
-x_val = train[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(val_term_doc.toArray()))
-test_x = test[["azure_sentiments", "perspective_toxicities"]].append(pd.DataFrame(test_term_doc.toArray()))
+x_train = train[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(trn_term_doc.toarray()).fillna(0))
+x_val = val[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(val_term_doc.toarray()).fillna(0))
+x_test = test[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(test_term_doc.toarray()).fillna(0))
 
-print("val: " + str(x_val.shape[0]) + ", " + str(len(val)))
-print(x.shape)
+x_train.fillna(0, inplace=True)
+x_val.fillna(0, inplace=True)
+x_test.fillna(0, inplace=True)
+print(x_train.shape)
 print(x_val.shape)
+
+# print(x)
 
 preds = np.zeros((len(test), len(label_cols)))
 
 print("Starting training...")
 for i, j in enumerate(label_cols):
     print('fit', j)
-    m,r = get_mdl(train[j])
-    preds[:,i] = m.predict_proba(test_x.multiply(r))[:,1]
-    print("Accuracy for " + j + ": " + str(accuracy_score(val[j], m.predict(x_val))))
+    # clf = RandomForestClassifier().fit(x, train[j])
+    clf, r = get_mdl(x_train, train[j])
+    # preds[:,i] = m.predict_proba(x_test.multiply(r))[:,1]
+    preds[:,i] = clf.predict_proba(x_test)[:,1]
+    print("Accuracy for " + j + ": " + str(accuracy_score(val[j], clf.predict(x_val))))
 
-    print("Persistent model to disk:", j)
-    joblib.dump(m, j + ".pkl")
+    print("Probability for", j, ":", preds[:,i])
+
+    print("Saving model to disk:", j)
+    clf_fname = j + ".pkl"
+    with open(clf_fname, "wb") as f:
+        joblib.dump(clf, f)
 
 print("Writing csv...")
 submid = pd.DataFrame({'id': subm["id"]})

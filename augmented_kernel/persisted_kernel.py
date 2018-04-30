@@ -16,100 +16,53 @@ from sklearn.externals import joblib
 
 import argparse
 
+from collect_feature_data import collect_features
+
+def tokenize(s):
+    re_tok = re.compile('([' + string.punctuation + '“”¨«»®´·º½¾¿¡§£₤‘’])')
+    return re_tok.sub(r' \1 ', s).split()
+
 parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--file", nargs=1, default=["web_input.csv"])
+parser.add_argument("-f", "--file", nargs=1, default=["web_output.csv"])
 
 args = parser.parse_args()
 
 input_fname = args.file[0]
 
-# train = pd.read_csv('../../input/train_augmented.csv') #.sample(1000)
-# test = pd.read_csv('../../input/test.csv') #.sample(1000)
-# subm = pd.read_csv('../../input/sample_submission.csv')
-
 input_df = pd.read_csv(input_fname)
 
-# train, val = train_test_split(train, test_size=0.2, random_state=42)
-# print(train.shape)
-# print(val.shape)
-
 label_cols = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
-# train['none'] = 1-train[label_cols].max(axis=1)
 
 ## take care of empty comments
 COMMENT = 'comment_text'
 input_df[COMMENT].fillna("unknown", inplace=True)
-# train[COMMENT].fillna("unknown", inplace=True)
-# val[COMMENT].fillna("unknown", inplace=True)
-# test[COMMENT].fillna("unknown", inplace=True)
 
-re_tok = re.compile('([' + string.punctuation + '“”¨«»®´·º½¾¿¡§£₤‘’])')
-
-def tokenize(s): 
-    return re_tok.sub(r' \1 ', s).split()
-
-def pr(y_i, y):
-    p = x[y==y_i].sum(0)
-    return (p+1) / ((y==y_i).sum()+1)
-
-def get_mdl(y):
-    y = y.values
-    r = np.log(pr(1,y) / pr(0,y))
-    # m = LogisticRegression(C=4, dual=True)
-    m = RandomForestClassifier()
-    x_nb = x.multiply(r)
-    print("    fitting...")
-    return m.fit(x_nb, y), r
-
-# print("Computing sparse matrix...")
-# n = train.shape[0]
-# vec = TfidfVectorizer(ngram_range=(1,2), tokenizer=tokenize,
-#                min_df=3, max_df=0.9, strip_accents='unicode', use_idf=1,
-#                smooth_idf=1, sublinear_tf=1 )
-# trn_term_doc = vec.fit_transform(train[COMMENT])
-# val_term_doc = vec.transform(val[COMMENT])
-# test_term_doc = vec.transform(test[COMMENT])
+print(input_df)
 
 # load vectorizer from disk
 vec = joblib.load("vectorizer.pkl")
-x = vec.transform(input_df)
+x = vec.transform(input_df[COMMENT])
+
+print(x)
+
+# Now add the additional features
+# augmented_features = collect_features(input_df)
+x = pd.DataFrame(x.toarray()).fillna(0)
+x = input_df[["azure_sentiments", "perspective_toxicities"]].join(x)
 
 print(x)
 
 # load the models from disk
 persisted_models = list(map(lambda m: joblib.load(m + ".pkl"), label_cols))
-print(persisted_models)
+# print(persisted_models)
+
+predicted_probas = np.zeros((len(x), len(label_cols)))
 
 for i, clf in enumerate(persisted_models):
     proba = clf.predict_proba(x)
-    print("Probability for", label_cols[i], ":", proba)
+    predicted_probas[:,i] = proba[:,1]
+    pred = clf.predict(x)
+    print("Probability for", label_cols[i], ":", proba[0][1])
 
-# print(trn_term_doc)
-# print(test_term_doc)
-
-# x = trn_term_doc
-# x_val = val_term_doc
-# test_x = test_term_doc
-
-# print("val: " + str(x_val.shape[0]) + ", " + str(len(val)))
-# print(x.shape)
-# print(x_val.shape)
-
-# preds = np.zeros((len(test), len(label_cols)))
-
-# print("Starting training...")
-# for i, j in enumerate(label_cols):
-#     print('fit', j)
-#     m,r = get_mdl(train[j])
-#     preds[:,i] = m.predict_proba(test_x.multiply(r))[:,1]
-#     print("Accuracy for " + j + ": " + str(accuracy_score(val[j], m.predict(x_val))))
-
-#     print("Persistent model to disk:", j)
-#     joblib.dump(m, j + ".pkl")
-
-# print("Writing csv...")
-# submid = pd.DataFrame({'id': subm["id"]})
-# submission = pd.concat([submid, pd.DataFrame(preds, columns = label_cols)], axis=1)
-# submission.to_csv('submission.csv', index=False)
-
-# print("Done.")
+predicted_probas = input_df[[COMMENT]].join(pd.DataFrame(predicted_probas, columns=label_cols))
+print(predicted_probas)
