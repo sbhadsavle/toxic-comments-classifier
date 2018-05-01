@@ -1,6 +1,7 @@
 
 const Koa = require("koa");
 const Router = require("koa-router");
+const cors = require("@koa/cors");
 
 const childProcess = require("child_process");
 
@@ -55,6 +56,7 @@ function parseCsv(data) {
 
 function main() {
     let app = new Koa();
+    app.use(cors());
     let router = new Router();
     router.get("/toxic", async (ctx, next) => {
         console.log(ctx.query);
@@ -65,11 +67,12 @@ function main() {
         console.log(res);
 
         res = childProcess.spawnSync("python", [collectFeaturesScript, "-f", "input.csv", "-o", "input_augmented.csv"]);
-        // console.log(res.stdout.toString());
-
+        console.log(res.stdout.toString());
+        console.log(res.stderr.toString());
+        console.log("here 1");
         res = childProcess.spawnSync("python", [predictionScript, "-f", "input_augmented.csv", "-o", "prediction.csv"]);
-        // console.log(res.stdout.toString());
-        // console.log(res.stderr.toString());
+        console.log(res.stdout.toString());
+        console.log(res.stderr.toString());
 
         let prediction = fs.readFileSync("prediction.csv");
 
