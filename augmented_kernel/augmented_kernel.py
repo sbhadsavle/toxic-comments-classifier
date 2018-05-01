@@ -11,6 +11,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import re, string
 
+from scipy.sparse import hstack
+
 from collect_feature_data import collect_features
 
 # persistence
@@ -47,12 +49,12 @@ def pr(x, y_i, y):
 
 def get_mdl(x, y):
     y = y.values
-    r = np.log(pr(x, 1,y) / pr(x, 0,y))
+    # r = np.log(pr(x, 1,y) / pr(x, 0,y))
     # m = LogisticRegression(C=4, dual=True)
     m = RandomForestClassifier()
     # x_nb = x.multiply(r)
     print("    fitting...")
-    return m.fit(x, y), r
+    return m.fit(x, y)# , r
 
 print("Computing sparse matrix...")
 n = train.shape[0]
@@ -69,13 +71,18 @@ test_term_doc = vec.transform(test[COMMENT])
 with open("vectorizer.pkl", "wb") as f:
     joblib.dump(vec, f)
 
-x_train = train[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(trn_term_doc.toarray()).fillna(0))
-x_val = val[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(val_term_doc.toarray()).fillna(0))
-x_test = test[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(test_term_doc.toarray()).fillna(0))
+# x_train = train[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(trn_term_doc.toarray()).fillna(0, inplace=True))
+x_train = hstack((trn_term_doc,np.array(train['azure_sentiments'])[:,None]))
+x_train = hstack((x_train,np.array(train['perspective_toxicities'])[:,None]))
 
-x_train.fillna(0, inplace=True)
-x_val.fillna(0, inplace=True)
-x_test.fillna(0, inplace=True)
+# x_val = val[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(val_term_doc.toarray()).fillna(0, inplace=True))
+x_val = hstack((val_term_doc,np.array(val['azure_sentiments'])[:,None]))
+x_val = hstack((x_val,np.array(val['perspective_toxicities'])[:,None]))
+
+# x_test = test[["azure_sentiments", "perspective_toxicities"]].join(pd.DataFrame(test_term_doc.toarray()).fillna(0, inplace=True))
+x_test = hstack((test_term_doc,np.array(test['azure_sentiments'])[:,None]))
+x_test = hstack((x_test,np.array(test['perspective_toxicities'])[:,None]))
+
 print(x_train.shape)
 print(x_val.shape)
 
@@ -87,7 +94,7 @@ print("Starting training...")
 for i, j in enumerate(label_cols):
     print('fit', j)
     # clf = RandomForestClassifier().fit(x, train[j])
-    clf, r = get_mdl(x_train, train[j])
+    clf = get_mdl(x_train, train[j])
     # preds[:,i] = m.predict_proba(x_test.multiply(r))[:,1]
     preds[:,i] = clf.predict_proba(x_test)[:,1]
     print("Accuracy for " + j + ": " + str(accuracy_score(val[j], clf.predict(x_val))))
