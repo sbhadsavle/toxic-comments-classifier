@@ -4,11 +4,14 @@
   "description": "Toxic Comments Server",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "child_process": "^1.0.2",
+    "csv": "^3.0.2",
     "koa": "^2.5.1",
     "koa-router": "^7.4.0"
   }
