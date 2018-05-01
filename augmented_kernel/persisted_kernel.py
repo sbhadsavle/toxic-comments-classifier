@@ -1,7 +1,8 @@
 """Classifier for Toxic Comments.
 Authors: Sarang Bhadsavle and Ben Fu
 """
-
+import os
+import sys
 import pandas as pd, numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -22,12 +23,18 @@ def tokenize(s):
     re_tok = re.compile('([' + string.punctuation + '“”¨«»®´·º½¾¿¡§£₤‘’])')
     return re_tok.sub(r' \1 ', s).split()
 
+script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", nargs=1, default=["web_output.csv"])
+parser.add_argument("-o", "--output-file", nargs=1, default=["web_prediction.csv"])
 
 args = parser.parse_args()
 
 input_fname = args.file[0]
+output_fname = args.output_file[0]
+print(input_fname)
+print(output_fname)
 
 input_df = pd.read_csv(input_fname)
 
@@ -40,7 +47,7 @@ input_df[COMMENT].fillna("unknown", inplace=True)
 print(input_df)
 
 # load vectorizer from disk
-vec = joblib.load("vectorizer.pkl")
+vec = joblib.load(script_dir + "/vectorizer.pkl")
 x = vec.transform(input_df[COMMENT])
 
 print(x)
@@ -53,7 +60,7 @@ x = input_df[["azure_sentiments", "perspective_toxicities"]].join(x)
 print(x)
 
 # load the models from disk
-persisted_models = list(map(lambda m: joblib.load(m + ".pkl"), label_cols))
+persisted_models = list(map(lambda m: joblib.load(script_dir + '/' + m + ".pkl"), label_cols))
 # print(persisted_models)
 
 predicted_probas = np.zeros((len(x), len(label_cols)))
@@ -66,3 +73,5 @@ for i, clf in enumerate(persisted_models):
 
 predicted_probas = input_df[[COMMENT]].join(pd.DataFrame(predicted_probas, columns=label_cols))
 print(predicted_probas)
+print(output_fname)
+predicted_probas.to_csv(output_fname, index=False)
