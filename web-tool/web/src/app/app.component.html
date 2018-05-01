@@ -1,0 +1,47 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<nav class="navbar is-primary">
+  <nav class="navbar-brand">
+    <a class="navbar-item">
+        <img src="http://www.freelogovectors.net/wp-content/uploads/2016/12/the-university-of-texas-at-austin-logo.png" height="28">
+    </a>
+    
+    <!-- <h1>
+      Toxic Comments Classifier
+    </h1> -->
+  </nav>
+</nav>
+
+<div class="box content">
+  <h3>Toxic Comments Classifier</h3>
+  <form #toxicForm="ngForm" (ngSubmit)="submitComment()">
+    <div class="field">
+      <label class="label">Comment</label>
+      <textarea class="textarea" type="" placeholder="Enter your comment here..." name="text" [(ngModel)]="text"></textarea>
+    </div>
+    <div class="field">
+      <div class="control">
+        <button class="button is-primary" type="submit">Submit</button>
+      </div>
+    </div>
+  </form>
+</div>
+<!-- <progress class="progress is-primary" value="15" max="100">30%</progress> -->
+<div class="box content">
+  <h3>Results</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th *ngFor="let label of toxicityLabelKeys">
+          {{ toxicityLabels[label] }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th *ngFor="let label of toxicityLabelKeys">
+          {{ toxicityResults[label] }}
+        </th>
+      </tr>
+    </tbody>
+  </table>
+</div>
