@@ -12,8 +12,14 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import re, string
 
-train = pd.read_csv('../../input/train.csv') #.sample(1000)
-test = pd.read_csv('../../input/test.csv') #.sample(1000)
+# evaluation utilities
+import os
+import sys
+sys.path.append('../evaluation_utils/')
+import evaluation_utils
+
+train = pd.read_csv('../../input/train.csv')#.sample(10000)
+test = pd.read_csv('../../input/test.csv')#.sample(10000)
 subm = pd.read_csv('../../input/sample_submission.csv')
 
 train, val = train_test_split(train, test_size=0.2, random_state=42)
@@ -69,15 +75,31 @@ print(x_val.shape)
 preds = np.zeros((len(test), len(label_cols)))
 
 print("Starting training...")
+final_models = {
+    'toxic': None,
+    'severe_toxic': None,
+    'obscene': None,
+    'threat': None,
+    'insult': None,
+    'identity_hate': None
+}
 for i, j in enumerate(label_cols):
     print('fit', j)
     m,r = get_mdl(train[j])
     preds[:,i] = m.predict_proba(test_x.multiply(r))[:,1]
     print("Accuracy for " + j + ": " + str(accuracy_score(val[j], m.predict(x_val))))
+    final_models[j] = m
 
-print("Writing csv...")
-submid = pd.DataFrame({'id': subm["id"]})
-submission = pd.concat([submid, pd.DataFrame(preds, columns = label_cols)], axis=1)
-submission.to_csv('submission.csv', index=False)
+print("Writing reports...")
+reports_dir = "reports/"
+if not os.path.exists(reports_dir):
+    os.makedirs(reports_dir)
+for label in label_cols:
+    evaluation_utils.write_classification_report(final_models[label].predict(x_val), val[label], "reports/baseline_classification_report_" + label + ".txt")
+    evaluation_utils.write_confusion_matrix(final_models[label].predict(x_val), val[label], "Baseline Performance: " + label, "reports/baseline_confusion_matrix_" + label + ".jpg")
+
+# submid = pd.DataFrame({'id': subm["id"]})
+# submission = pd.concat([submid, pd.DataFrame(preds, columns = label_cols)], axis=1)
+# submission.to_csv('submission.csv', index=False)
 
 print("Done.")
