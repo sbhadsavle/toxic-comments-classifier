@@ -12,6 +12,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import re, string
 
+from scipy.sparse import hstack
+
 # persistence
 from sklearn.externals import joblib
 
@@ -54,8 +56,10 @@ print(x)
 
 # Now add the additional features
 # augmented_features = collect_features(input_df)
-x = pd.DataFrame(x.toarray()).fillna(0)
-x = input_df[["azure_sentiments", "perspective_toxicities"]].join(x)
+x = hstack((x, np.array(input_df['azure_sentiments'])[:,None]))
+x = hstack((x, np.array(input_df['perspective_toxicities'])[:,None]))
+# x = pd.DataFrame(x.toarray()).fillna(0)
+# x = input_df[["azure_sentiments", "perspective_toxicities"]].join(x)
 
 print(x)
 
@@ -63,7 +67,7 @@ print(x)
 persisted_models = list(map(lambda m: joblib.load(script_dir + '/' + m + ".pkl"), label_cols))
 # print(persisted_models)
 
-predicted_probas = np.zeros((len(x), len(label_cols)))
+predicted_probas = np.zeros((x.shape[0], len(label_cols)))
 
 for i, clf in enumerate(persisted_models):
     proba = clf.predict_proba(x)

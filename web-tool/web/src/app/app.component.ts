@@ -8,12 +8,12 @@ import { ToxicClassifierService } from './toxic-classifier.service';
 })
 export class AppComponent {
   toxicityLabels = {
-    toxic: "toxic",
-    severe_toxic: "severe_toxic",
-    obscene: "obscene",
-    threat: "threat",
-    insult: "insult",
-    identity_hate: "identity_hate"
+    toxic: "Toxic",
+    severe_toxic: "Severe Toxic",
+    obscene: "Obscene",
+    threat: "Threat",
+    insult: "Insult",
+    identity_hate: "Identity Hate"
   };
 
   toxicityLabelKeys = Object.keys(this.toxicityLabels);
@@ -32,7 +32,7 @@ export class AppComponent {
   constructor(
     private toxicClassifierService: ToxicClassifierService
   ) {
-    
+
   }
 
   async submitComment() {
@@ -46,7 +46,7 @@ export class AppComponent {
     catch(err) {
       console.error(err);
     }
-    
+
   }
 
 }
