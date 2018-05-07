@@ -1,5 +1,6 @@
 """Classifier for Toxic Comments.
 Authors: Sarang Bhadsavle and Ben Fu
+Adapted from original author: Jeremy Howard (https://www.kaggle.com/jhoward/nb-svm-strong-linear-baseline/notebook)
 """
 
 import pandas as pd, numpy as np
