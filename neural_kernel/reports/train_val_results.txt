@@ -1,0 +1,126 @@
+Accuracy for toxic: 0.96240
+Accuracy for severe_toxic: 0.98834
+Accuracy for obscene: 0.96350
+Accuracy for threat: 0.99787
+Accuracy for insult: 0.96832
+Accuracy for identity_hate: 0.99079
+
+
+/usr/local/lib/python3.5/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+(127656, 10)
+(31915, 10)
+Computing sparse matrix...
+(127656, 357938)
+(31915, 357938)
+Starting training...
+fit toxic
+2018-05-07 02:29:07.545085: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2018-05-07 02:29:13.938642: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1356] Found device 0 with properties: 
+name: Tesla K80 major: 3 minor: 7 memoryClockRate(GHz): 0.8235
+pciBusID: 5cd6:00:00.0
+totalMemory: 11.17GiB freeMemory: 11.10GiB
+2018-05-07 02:29:13.942879: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1435] Adding visible gpu devices: 0
+2018-05-07 02:29:14.209884: I tensorflow/core/common_runtime/gpu/gpu_device.cc:923] Device interconnect StreamExecutor with strength 1 edge matrix:
+2018-05-07 02:29:14.211359: I tensorflow/core/common_runtime/gpu/gpu_device.cc:929]      0 
+2018-05-07 02:29:14.212281: I tensorflow/core/common_runtime/gpu/gpu_device.cc:942] 0:   N 
+2018-05-07 02:29:14.213452: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1053] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10764 MB memory) -> physical GPU (device: 0, name: Tesla K80, pci bus id: 5cd6:00:00.0, compute capability: 3.7)
+Loaded model from disk
+Accuracy for toxic: 0.9624001253329155
+Writing reports...
+Saved model to disk
+fit severe_toxic
+Loaded model from disk
+Accuracy for severe_toxic: 0.9883440388532039
+Writing reports...
+Saved model to disk
+/usr/local/lib/python3.5/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+(127656, 10)
+(31915, 10)
+Computing sparse matrix...
+(127656, 357938)
+(31915, 357938)
+Starting training...
+fit obscene
+neural_kernel.py:68: UserWarning: Update your `Dense` call to the Keras 2 API: `Dense(units=512, input_dim=357938, kernel_initializer="uniform", activation="tanh")`
+  m.add(Dense(units=512, init='uniform', activation='tanh', input_dim=x.shape[1]))
+neural_kernel.py:70: UserWarning: Update your `Dense` call to the Keras 2 API: `Dense(units=1, kernel_initializer="uniform", activation="relu")`
+  m.add(Dense(units=1, init='uniform', activation='relu'))
+Epoch 1/3
+2018-05-07 02:42:49.603437: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2018-05-07 02:42:56.065674: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1356] Found device 0 with properties: 
+name: Tesla K80 major: 3 minor: 7 memoryClockRate(GHz): 0.8235
+pciBusID: 5cd6:00:00.0
+totalMemory: 11.17GiB freeMemory: 11.10GiB
+2018-05-07 02:42:56.065725: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1435] Adding visible gpu devices: 0
+2018-05-07 02:42:56.349550: I tensorflow/core/common_runtime/gpu/gpu_device.cc:923] Device interconnect StreamExecutor with strength 1 edge matrix:
+2018-05-07 02:42:56.349624: I tensorflow/core/common_runtime/gpu/gpu_device.cc:929]      0 
+2018-05-07 02:42:56.349648: I tensorflow/core/common_runtime/gpu/gpu_device.cc:942] 0:   N 
+2018-05-07 02:42:56.349921: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1053] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10764 MB memory) -> physical GPU (device: 0, name: Tesla K80, pci bus id: 5cd6:00:00.0, compute capability: 3.7)
+127656/127656 [==============================] - 599s 5ms/step - loss: 0.1070 - acc: 0.9700
+Epoch 2/3
+127656/127656 [==============================] - 591s 5ms/step - loss: 0.0718 - acc: 0.9716
+Epoch 3/3
+127656/127656 [==============================] - 591s 5ms/step - loss: 0.1166 - acc: 0.9559
+Accuracy for obscene: 0.9634967883440388
+Writing reports...
+Saved model to disk
+fit threat
+Epoch 1/3
+127656/127656 [==============================] - 590s 5ms/step - loss: 0.0402 - acc: 0.9967
+Epoch 2/3
+127656/127656 [==============================] - 589s 5ms/step - loss: 0.0346 - acc: 0.9973
+Epoch 3/3
+127656/127656 [==============================] - 589s 5ms/step - loss: 0.0336 - acc: 0.9970
+Accuracy for threat: 0.9978693404355319
+Writing reports...
+Saved model to disk
+/usr/local/lib/python3.5/dist-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Using TensorFlow backend.
+(127656, 10)
+(31915, 10)
+Computing sparse matrix...
+(127656, 357938)
+(31915, 357938)
+Starting training...
+fit insult
+neural_kernel.py:68: UserWarning: Update your `Dense` call to the Keras 2 API: `Dense(kernel_initializer="uniform", input_dim=357938, units=512, activation="tanh")`
+  m.add(Dense(units=512, init='uniform', activation='tanh', input_dim=x.shape[1]))
+neural_kernel.py:70: UserWarning: Update your `Dense` call to the Keras 2 API: `Dense(kernel_initializer="uniform", activation="relu", units=1)`
+  m.add(Dense(units=1, init='uniform', activation='relu'))
+Epoch 1/3
+2018-05-07 03:54:12.584144: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2018-05-07 03:54:18.913050: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1356] Found device 0 with properties: 
+name: Tesla K80 major: 3 minor: 7 memoryClockRate(GHz): 0.8235
+pciBusID: 5cd6:00:00.0
+totalMemory: 11.17GiB freeMemory: 11.10GiB
+2018-05-07 03:54:18.913103: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1435] Adding visible gpu devices: 0
+2018-05-07 03:54:19.189267: I tensorflow/core/common_runtime/gpu/gpu_device.cc:923] Device interconnect StreamExecutor with strength 1 edge matrix:
+2018-05-07 03:54:19.189318: I tensorflow/core/common_runtime/gpu/gpu_device.cc:929]      0 
+2018-05-07 03:54:19.189339: I tensorflow/core/common_runtime/gpu/gpu_device.cc:942] 0:   N 
+2018-05-07 03:54:19.189608: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1053] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10764 MB memory) -> physical GPU (device: 0, name: Tesla K80, pci bus id: 5cd6:00:00.0, compute capability: 3.7)
+127656/127656 [==============================] - 599s 5ms/step - loss: 0.1661 - acc: 0.9641
+Epoch 2/3
+127656/127656 [==============================] - 590s 5ms/step - loss: 0.2199 - acc: 0.9551
+Epoch 3/3
+127656/127656 [==============================] - 590s 5ms/step - loss: 0.1527 - acc: 0.9562
+Accuracy for insult: 0.9683221055929814
+Writing reports...
+Saved model to disk
+fit identity_hate
+Epoch 1/3
+127656/127656 [==============================] - 590s 5ms/step - loss: 0.1403 - acc: 0.9913
+Epoch 2/3
+127656/127656 [==============================] - 588s 5ms/step - loss: 0.1403 - acc: 0.9913
+Epoch 3/3
+127656/127656 [==============================] - 589s 5ms/step - loss: 0.1403 - acc: 0.9913
+Accuracy for identity_hate: 0.9907880307065643
+Writing reports...
+/usr/local/lib/python3.5/dist-packages/sklearn/metrics/classification.py:1137: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples.
+  'recall', 'true', average, warn_for)
+Saved model to disk
+Done.
