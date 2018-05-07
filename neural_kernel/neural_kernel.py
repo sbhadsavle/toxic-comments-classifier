@@ -4,12 +4,11 @@ Authors: Sarang Bhadsavle and Ben Fu
 
 import pandas as pd, numpy as np
 
-# from sklearn.linear_model import LogisticRegression
-# from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, MaxPooling1D
 from keras.optimizers import Nadam
+from keras.models import model_from_json
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import accuracy_score
@@ -30,7 +29,7 @@ import sys
 sys.path.append('../evaluation_utils/')
 import evaluation_utils
 
-train = pd.read_csv('../../input/train_augmented.csv').sample(10000)
+train = pd.read_csv('../../input/train_augmented.csv')#.sample(10000)
 test = pd.read_csv("web_output.csv")
 subm = pd.read_csv('../../input/sample_submission.csv')
 
@@ -124,24 +123,30 @@ x_test = x_test.tocsr()
 x_val = x_val.tocsr()
 
 print("Starting training...")
-final_models = {
-    'toxic': None,
-    'severe_toxic': None,
-    'obscene': None,
-    'threat': None,
-    'insult': None,
-    'identity_hate': None
-}
 for i, j in enumerate(label_cols):
     print('fit', j)
-    clf = get_mdl(x_train, train[j])
+    clf = None
+    if os.path.isfile(str(j) + "_clf.json"):
+        json_file = open(str(j) + "_clf.json", 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        clf = model_from_json(loaded_model_json)
+        # load weights into new model
+        clf.load_weights(str(j) + "_clf_weights.h5")
+        print("Loaded model from disk")
+    else:
+        clf = get_mdl(x_train, train[j])
     # preds[:,i] = m.predict_proba(x_test.multiply(r))[:,1]
     # preds[:,i] = clf.predict_proba(x_test)[:,1]
     print("Accuracy for " + j + ": " + str(accuracy_score(val[j], [ roundfunc(x) for x in clf.predict(x_val) ])))
-
+    print("Writing reports...")
+    reports_dir = "reports/"
+    if not os.path.exists(reports_dir):
+        os.makedirs(reports_dir)
+    final_preds = [ roundfunc(x) for x in clf.predict(x_val) ]
+    evaluation_utils.write_classification_report(final_preds, val[j], "reports/neural_classification_report_" + j + ".txt")
+    evaluation_utils.write_confusion_matrix(final_preds, val[j], "Neural Network Performance: " + j, "reports/neural_confusion_matrix_" + j + ".png")
     # print("Probability for", j, ":", preds[:,i])
-
-    final_models[j] = clf
 
     # serialize model to JSON
     model_json = clf.to_json()
@@ -150,14 +155,5 @@ for i, j in enumerate(label_cols):
     # serialize weights to HDF5
     clf.save_weights(str(j) + "_clf_weights.h5")
     print("Saved model to disk")
-
-print("Writing reports...")
-reports_dir = "reports/"
-if not os.path.exists(reports_dir):
-    os.makedirs(reports_dir)
-for label in label_cols:
-    final_preds = [ roundfunc(x) for x in final_models[label].predict(x_val) ]
-    evaluation_utils.write_classification_report(final_preds, val[label], "reports/neural_classification_report_" + label + ".txt")
-    evaluation_utils.write_confusion_matrix(final_preds, val[label], "Neural Network Performance: " + label, "reports/neural_confusion_matrix_" + label + ".png")
 
 print("Done.")
