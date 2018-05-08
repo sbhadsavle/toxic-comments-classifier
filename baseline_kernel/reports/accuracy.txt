@@ -1,0 +1,6 @@
+Accuracy for toxic: 0.9487388375372082
+Accuracy for severe_toxic: 0.9898480338398872
+Accuracy for obscene: 0.9731160896130346
+Accuracy for threat: 0.9978380072066426
+Accuracy for insult: 0.9654081153062823
+Accuracy for identity_hate: 0.9912893623687921
