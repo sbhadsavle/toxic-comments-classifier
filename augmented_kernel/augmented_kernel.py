@@ -18,7 +18,13 @@ from collect_feature_data import collect_features
 # persistence
 from sklearn.externals import joblib
 
-train = pd.read_csv('../../input/train_augmented.csv')# .sample(10)
+# evaluation utilities
+import os
+import sys
+sys.path.append('../evaluation_utils/')
+import evaluation_utils
+
+train = pd.read_csv('../../input/train_augmented.csv')#.sample(10000)
 test = pd.read_csv("web_output.csv")
 subm = pd.read_csv('../../input/sample_submission.csv')
 
@@ -91,6 +97,14 @@ print(x_val.shape)
 preds = np.zeros((len(test), len(label_cols)))
 
 print("Starting training...")
+final_models = {
+    'toxic': None,
+    'severe_toxic': None,
+    'obscene': None,
+    'threat': None,
+    'insult': None,
+    'identity_hate': None
+}
 for i, j in enumerate(label_cols):
     print('fit', j)
     # clf = RandomForestClassifier().fit(x, train[j])
@@ -105,10 +119,18 @@ for i, j in enumerate(label_cols):
     clf_fname = j + ".pkl"
     with open(clf_fname, "wb") as f:
         joblib.dump(clf, f)
+    final_models[j] = clf
 
-print("Writing csv...")
-submid = pd.DataFrame({'id': subm["id"]})
-submission = pd.concat([submid, pd.DataFrame(preds, columns = label_cols)], axis=1)
-submission.to_csv('submission.csv', index=False)
+print("Writing reports...")
+reports_dir = "reports/"
+if not os.path.exists(reports_dir):
+    os.makedirs(reports_dir)
+for label in label_cols:
+    evaluation_utils.write_classification_report(final_models[label].predict(x_val), val[label], "reports/augmented_classification_report_" + label + ".txt")
+    evaluation_utils.write_confusion_matrix(final_models[label].predict(x_val), val[label], "Augmented Classifier Performance: " + label, "reports/augmented_confusion_matrix_" + label + ".jpg")
+
+# submid = pd.DataFrame({'id': subm["id"]})
+# submission = pd.concat([submid, pd.DataFrame(preds, columns = label_cols)], axis=1)
+# submission.to_csv('submission.csv', index=False)
 
 print("Done.")
